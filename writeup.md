@@ -23,7 +23,8 @@ The goals / steps of this project are the following:
 [image3]: ./output_images/testimage_color_gradient.png "Color and Gradient"
 [image4]: ./output_images/testimage_perspective.png "Perspective Transform"
 [image5]: ./output_images/testimage_lanelinedetection.png "Lane Line Detection"
-[image6]: ./output_images/testimage_withlaneinfo.png "Output"
+[image6]: ./output_images/testimage_validation.png "Validation"
+[image6]: ./output_images/testimage_withlaneinfo.png "Result with lane information"
 [video1]: ./result.mp4 "Result Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
@@ -79,21 +80,21 @@ My perspective transform was working as expected by drawing the `src` and `dst` 
 
 From the binary images with lane line pixes detected, I fit my lane lines with a 2nd order polynomial using the code in the "Find Lane Line" section of main.ipynb. 
 First of all, I used the peak of histogram to find the possilbe lane line location as course materials suggested. 
-Then I used the Sliding Window Search method to conduct the search for lane line pixel candidates. Any pixel within the search window will be used to fit the polynomial curve. 
-These methods are good enough to generate good result for individual test images. When applying it to video, the result is not good enough. I used some other techniques to stablize the video output, which will be discused in detail in Discussion section at the end of this document. 
+Then I used the Sliding Window Search method to conduct the search for lane line pixel candidates. Any pixel within the search window will be used to fit the polynomial curve. The output image can been seen as in the left side of the following image:
 
 ![alt text][image5]
 
 ####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I calculated the radius of curvature using the method introducted in the course materials by taking the derivatives of the 2nd order ploynomial curve. I calculated the vehicle position respecting to the center by getting a middle point of fitted lane curves and comparing it to 640, half of the image size in X direction. I added the information to the final result as show in the image below:
+I calculated the radius of curvature using the method introducted in the course materials by taking the derivatives of the 2nd order ploynomial curve. I calculated the vehicle position respecting to the center by getting a middle point of fitted lane curves and comparing it to 640, half of the image size in X direction. I added the information to the final result as shown in the image below:
 
-![alt text][image6]
+![alt text][image7]
 
 ####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I plotted the lane line polynomial curves back to the original image by applying OpenCV `cv2.warpPerspective` with inverse matrix of original perspective transformation. The result on a test image can be found in above image. 
+I plotted the lane line polynomial curves back to the original image by applying OpenCV `cv2.warpPerspective` with inverse matrix of original perspective transformation matrix. The result on a test image can be found in the right side of the following image: 
 
+![alt text][image5]
 
 ---
 
@@ -101,7 +102,7 @@ I plotted the lane line polynomial curves back to the original image by applying
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./result.mp4)
 
 ---
 
@@ -109,5 +110,15 @@ Here's a [link to my video result](./project_video.mp4)
 
 ####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+Above discussed methods are good enough to generate acceptable results for individual test images. When applying it as a video pipeline, the result is not enough. I got some bad results caused by shadows or road patches. The issue could be solved by leveraging the related information between continuous frames. 
+
+Here are some ways I borrowed or modified from Udacity course materials "Tips and Tricks for Project":
+    1.I used neighboring regions near the last fitted curves to search for candidate lane line pixels. The region is much smaller than the one of original window search method. It is quicker in performance and more importantly it is more reliable since it could remove lots of noise pixels. 
+    2.I used the idea of lane line parallel to determine whether fitted curves from one frame are valid or not. For each frame, I recorded 3 sets of points, indicated by the end points of each red line in the following image. I wanted to make sure the distance change of each line between current frame and last frame should not be too big. Based on the ratio of the change, I classifed the detected curves as "good", "ok" and "bad". I kept the good and ok frames and added the fitted curves to a weighted moving average of results. Good frames were weighted higher than Ok frames. For bad frames, I discarded them and used the moving average fitted curves instead. But once I rejected consecutive 3 frames or more, I would use the original Window Search method to search for new fitted lines and use a looser standard to accept the "new" one. (I had tried to use fitted curve curvature to validify the results but found that curvature is too sensitive to minor lane line change.)
+![alt text][image6] 
+    3.I used the fitted curves from the first 5 consecutive "good" frame as my confident starting point of my moving average fitted curves. 
+
+The result is much more reliable and smoother after applying above techniques. However, I still saw few fitted line off the real lane line a little, especially at shadow or curved lanes. There are two directions that I could improve the algorithm/pipeline. The first one is to try different color or gradient methods to reduce the shadow and noise. The second is to use other or better way to smooth the result. 
+
+
 

@@ -21,10 +21,10 @@ The goals / steps of this project are the following:
 [image1]: ./output_images/calibration9_withcorner.png "Calibration Image with Corners"
 [image2]: ./output_images/test5_undistort.png "Test Image Undistort"
 [image3]: ./output_images/testimage_color_gradient.png "Color and Gradient"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
-[video1]: ./project_video.mp4 "Video"
+[image4]: ./output_images/testimage_perspective.png "Perspective Transform"
+[image5]: ./output_images/testimage_lanelinedetection.png "Lane Line Detection"
+[image6]: ./output_images/testimage_withlaneinfo.jpg "Output"
+[video1]: ./result.mp4 "Result Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 ###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -62,31 +62,16 @@ I did the perspective transform first since we are noly interested in lane line 
 
 ####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
-
-```
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
-
-```
-This resulted in the following source and destination points:
+The code for my perspective transform is in the 3rd code cell of main.ipynb).  The `perspective_transform()` function takes as inputs an image (`img`) and applis the `calculate_undistort()` first to undistort the image. Then it utilizes OpenCV `cv2.getPerspectiveTransform()` and `cv2.warpPerspective()` to generate the wraped image. I hardcoded the source and destination points based on provided test images (the goal is to only show two lane lines in the result):
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+| 595, 460      | 150, 40       | 
+| 300, 680      | 150, 680      |
+| 1090, 680     | 1180, 680     |
+| 720, 460      | 1180, 40      |
 
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
+My perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image. It can be seen in the following image:
 
 ![alt text][image4]
 

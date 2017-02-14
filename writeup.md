@@ -23,7 +23,7 @@ The goals / steps of this project are the following:
 [image3]: ./output_images/testimage_color_gradient.png "Color and Gradient"
 [image4]: ./output_images/testimage_perspective.png "Perspective Transform"
 [image5]: ./output_images/testimage_lanelinedetection.png "Lane Line Detection"
-[image6]: ./output_images/testimage_withlaneinfo.jpg "Output"
+[image6]: ./output_images/testimage_withlaneinfo.png "Output"
 [video1]: ./result.mp4 "Result Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
@@ -77,19 +77,23 @@ My perspective transform was working as expected by drawing the `src` and `dst` 
 
 ####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+From the binary images with lane line pixes detected, I fit my lane lines with a 2nd order polynomial using the code in the "Find Lane Line" section of main.ipynb. 
+First of all, I used the peak of histogram to find the possilbe lane line location as course materials suggested. 
+Then I used the Sliding Window Search method to conduct the search for lane line pixel candidates. Any pixel within the search window will be used to fit the polynomial curve. 
+These methods are good enough to generate good result for individual test images. When applying it to video, the result is not good enough. I used some other techniques to stablize the video output, which will be discused in detail in Discussion section at the end of this document. 
 
 ![alt text][image5]
 
 ####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+I calculated the radius of curvature using the method introducted in the course materials by taking the derivatives of the 2nd order ploynomial curve. I calculated the vehicle position respecting to the center by getting a middle point of fitted lane curves and comparing it to 640, half of the image size in X direction. I added the information to the final result as show in the image below:
+
+![alt text][image6]
 
 ####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+I plotted the lane line polynomial curves back to the original image by applying OpenCV `cv2.warpPerspective` with inverse matrix of original perspective transformation. The result on a test image can be found in above image. 
 
-![alt text][image6]
 
 ---
 
